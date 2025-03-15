@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Calculator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="400">
+        Title="Calculator" Height="600" Width="400"
+        Icon="Assets/calculator-icon.ico">
     
     <Window.Style>
         <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}"/>
@@ -27,12 +28,14 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="txtInput" Grid.Row="0" Grid.ColumnSpan="4" Margin="2" TextAlignment="Right" Text="0" FontSize="40" IsReadOnly="True"/>
+        <TextBox x:Name="numberInput" Grid.Row="0" Grid.ColumnSpan="4" Margin="2"
+                 TextAlignment="Right" Text="0" FontSize="40" IsReadOnly="True"
+                 TextChanged="numberInput_TextChanged"/>
         
         <Button x:Name="buttonPercent" Content="%" Grid.Row="1" Grid.Column="0" FontSize="24" Margin="2"/>
         <Button x:Name="buttonClearEntry" Content="CE" Grid.Row="1" Grid.Column="1" FontSize="24" Margin="2"/>
         <Button x:Name="buttonClearAll" Content="C" Grid.Row="1" Grid.Column="2" FontSize="24" Margin="2"/>
-        <Button x:Name="buttonDivision" Content="←" Grid.Row="1" Grid.Column="3" FontSize="24" Margin="2" />
+        <Button x:Name="buttonRemove" Content="←" Grid.Row="1" Grid.Column="3" FontSize="24" Margin="2" Click="buttonRemove_Click"/>
         
         <Button x:Name="buttonTemp1" Content="" Grid.Row="2" Grid.Column="0" FontSize="24" Margin="2" />
         <Button x:Name="buttonTemp2" Content="" Grid.Row="2" Grid.Column="1" FontSize="24" Margin="2" />
@@ -40,22 +43,22 @@
         <Button x:Name="buttonBack" Content="/" Grid.Row="2" Grid.Column="3" FontSize="24" Margin="2" />
         
         <Button x:Name="buttonMultiplication" Content="×" Grid.Row="3" Grid.Column="3" FontSize="24" Margin="2" />
-        <Button x:Name="button7" Content="7" Grid.Row="3" Grid.Column="0" FontSize="24" Margin="2" />
-        <Button x:Name="button8" Content="8" Grid.Row="3" Grid.Column="1" FontSize="24" Margin="2" />
-        <Button x:Name="button9" Content="9" Grid.Row="3" Grid.Column="2" FontSize="24" Margin="2" />
+        <Button x:Name="button7" Content="7" Grid.Row="3" Grid.Column="0" FontSize="24" Margin="2" Click="buttonNumber_Click"/>
+        <Button x:Name="button8" Content="8" Grid.Row="3" Grid.Column="1" FontSize="24" Margin="2" Click="buttonNumber_Click"/>
+        <Button x:Name="button9" Content="9" Grid.Row="3" Grid.Column="2" FontSize="24" Margin="2" Click="buttonNumber_Click"/>
         
-        <Button x:Name="button4" Content="4" Grid.Row="4" Grid.Column="0" FontSize="24" Margin="2" />
-        <Button x:Name="button5" Content="5" Grid.Row="4" Grid.Column="1" FontSize="24" Margin="2" />
-        <Button x:Name="button6" Content="6" Grid.Row="4" Grid.Column="2" FontSize="24" Margin="2" />
+        <Button x:Name="button4" Content="4" Grid.Row="4" Grid.Column="0" FontSize="24" Margin="2" Click="buttonNumber_Click"/>
+        <Button x:Name="button5" Content="5" Grid.Row="4" Grid.Column="1" FontSize="24" Margin="2" Click="buttonNumber_Click"/>
+        <Button x:Name="button6" Content="6" Grid.Row="4" Grid.Column="2" FontSize="24" Margin="2" Click="buttonNumber_Click"/>
         <Button x:Name="buttonSubtraction" Content="-" Grid.Row="4" Grid.Column="3" FontSize="24" Margin="2"/>
         
-        <Button x:Name="button1" Content="1" Grid.Row="5" Grid.Column="0" FontSize="24" Margin="2" />
-        <Button x:Name="button2" Content="2" Grid.Row="5" Grid.Column="1" FontSize="24" Margin="2" />
-        <Button x:Name="button3" Content="3" Grid.Row="5" Grid.Column="2" FontSize="24" Margin="2" />
+        <Button x:Name="button1" Content="1" Grid.Row="5" Grid.Column="0" FontSize="24" Margin="2" Click="buttonNumber_Click"/>
+        <Button x:Name="button2" Content="2" Grid.Row="5" Grid.Column="1" FontSize="24" Margin="2" Click="buttonNumber_Click"/>
+        <Button x:Name="button3" Content="3" Grid.Row="5" Grid.Column="2" FontSize="24" Margin="2" Click="buttonNumber_Click"/>
         <Button x:Name="buttonSum" Content="+" Grid.Row="5" Grid.Column="4" FontSize="24" Margin="2" />
         
         <Button x:Name="buttonNegate" Content="+/-" Grid.Row="6" Grid.Column="0" FontSize="24" Margin="2" />
-        <Button x:Name="button0" Content="0" Grid.Row="6" Grid.Column="1" FontSize="24" Margin="2" />
+        <Button x:Name="button0" Content="0" Grid.Row="6" Grid.Column="1" FontSize="24" Margin="2" Click="buttonNumber_Click"/>
         <Button x:Name="buttonPoint" Content="," Grid.Row="6" Grid.Column="2" FontSize="24" Margin="2" />
         <Button x:Name="buttonEquals" Content="=" Grid.Row="6" Grid.Column="3" FontSize="24" Margin="2"/>
     </Grid>

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,12 +14,11 @@ using Calculator.Helpers;
 
 namespace Calculator;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainWindow : Window
 {
     private const int MaxDigits = 15;
+    private readonly string DecimalSeparator = ",";
+
     private decimal FirstValue { get; set; }
 
     IOperation Operation;
@@ -41,6 +41,34 @@ public partial class MainWindow : Window
                 SendToInput(number);
         }
     }
+    
+    private void buttonNegate_Click(object sender, RoutedEventArgs e)
+    {
+        string current = numberInput.Text.Replace(" ", "");
+
+        if (current == "0" || string.IsNullOrEmpty(current))
+        {
+            numberInput.Text = "-";
+            return;
+        }
+
+        bool isNegative = current.StartsWith("-");
+
+        if (isNegative)
+            current = current.Substring(1);
+        else
+            current = "-" + current;
+
+        numberInput.Text = current;
+    }
+    
+    private void buttonPoint_Click(object sender, RoutedEventArgs e)
+    {
+        if (!numberInput.Text.Contains(DecimalSeparator))
+        {
+            SendToInput(DecimalSeparator);
+        }
+    }
 
     private void SendToInput(string number)
     {
@@ -54,29 +82,41 @@ public partial class MainWindow : Window
     {
         if (sender is TextBox textBox)
         {
-            textBox.TextChanged -= numberInput_TextChanged; 
+            textBox.TextChanged -= numberInput_TextChanged;
 
             int cursorPosition = textBox.SelectionStart;
 
-            string rawNumber = new string(textBox.Text.Where(char.IsDigit).ToArray());
+            string[] parts = textBox.Text.Split(new[] { DecimalSeparator }, StringSplitOptions.None);
 
-            if (rawNumber.Length > MaxDigits)
-                rawNumber = rawNumber.Substring(0, MaxDigits);
-            
-            string formattedNumber = string.Join(" ", 
-                Enumerable.Range(0, rawNumber.Length)
+            bool isNegative = parts[0].StartsWith("-");
+            string integerPart = isNegative ? parts[0].Substring(1) : parts[0];
+            string decimalPart = parts.Length > 1 ? parts[1] : "";
+
+            string rawInteger = new string(integerPart.Where(char.IsDigit).ToArray());
+            if (rawInteger.Length > MaxDigits)
+                rawInteger = rawInteger.Substring(0, MaxDigits);
+
+            string formattedInteger = string.Join(" ",
+                Enumerable.Range(0, rawInteger.Length)
                     .Reverse()
                     .GroupBy(i => i / 3)
-                    .Select(g => new string(g.Select(i => rawNumber[i]).Reverse().ToArray()))
+                    .Select(g => new string(g.Select(i => rawInteger[i]).Reverse().ToArray()))
                     .Reverse());
+
+            if (isNegative)
+                formattedInteger = "-" + formattedInteger;
+
+            string formattedNumber = formattedInteger;
+            if (parts.Length > 1 || textBox.Text.EndsWith(DecimalSeparator))
+            {
+                formattedNumber += DecimalSeparator + decimalPart;
+            }
 
             textBox.Text = formattedNumber;
 
-            int spacesBeforeCursor = formattedNumber.Take(cursorPosition).Count(c => c == ' ');
-            int newCursorPosition = Math.Min(formattedNumber.Length, cursorPosition + spacesBeforeCursor);
-            textBox.SelectionStart = newCursorPosition;
+            textBox.SelectionStart = Math.Min(formattedNumber.Length, cursorPosition);
 
-            textBox.TextChanged += numberInput_TextChanged; 
+            textBox.TextChanged += numberInput_TextChanged;
         }
     }
 
@@ -116,36 +156,98 @@ public partial class MainWindow : Window
                 break;
 
             case "*":
-                btnMultiplication.PerformClick();
+                buttonMultiply.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 break;
 
             case "-":
-                btnSubtraction.PerformClick();
+                buttonSubstract.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 break;
 
             case "+":
-                btnSum.PerformClick();
+                buttonSum.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 break;
 
             case "/":
-                btnDivision.PerformClick();
+                buttonDivide.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 break;
 
             case "=":
-                btnEquals.PerformClick();
+                buttonEquals.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 break;
 
             default:
-                if (e.Text == DecimalSeparator)
-                    btnPoint.PerformClick();
-                else if (e.Text[0] == (char)8)
-                    btnBack.PerformClick();
-                else if (e.Text[0] == (char)13)
-                    btnEquals.PerformClick();
+                if (e.Text == DecimalSeparator) 
+                    buttonPoint.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                else if (e.Text[0] == (char)8) 
+                    buttonRemove.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                else if (e.Text[0] == (char)13) 
+                    buttonEquals.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
                 break;
         }
 
-        btnEquals.Focus();
+        buttonEquals.Focus();
+    }
+    
+    private void Operator_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button button && button.Tag is IOperation selectedOperation)
+        {
+            try
+            {
+                string input = numberInput.Text.Replace(" ", "");
+                FirstValue = decimal.Parse(input, CultureInfo.GetCultureInfo("pl-PL"));
+                Operation = selectedOperation;
+
+                numberInput.Text = "0"; 
+            }
+            catch
+            {
+                numberInput.Text = "Błąd";
+            }
+        }
+    }
+    
+    private void buttonEquals_Click(object sender, RoutedEventArgs e)
+    {
+        if (Operation == null)
+            return;
+
+        try
+        {
+            string input = numberInput.Text.Replace(" ", "");
+            decimal secondValue = decimal.Parse(input, CultureInfo.GetCultureInfo("pl-PL"));
+
+            decimal result = Operation.Operation(FirstValue, secondValue);
+            numberInput.Text = result.ToString(CultureInfo.GetCultureInfo("pl-PL"));
+            Operation = null; 
+        }
+        catch
+        {
+            numberInput.Text = "Błąd";
+        }
+    }
+    
+    private void buttonPercent_Click(object sender, RoutedEventArgs e)
+    {
+        if (Operation == null)
+            return;
+
+        try
+        {
+            string input = numberInput.Text.Replace(" ", "");
+            decimal percentValue = decimal.Parse(input, CultureInfo.GetCultureInfo("pl-PL"));
+
+            decimal secondValue = FirstValue * (percentValue / 100);
+
+            decimal result = Operation.Operation(FirstValue, secondValue);
+            numberInput.Text = result.ToString(CultureInfo.GetCultureInfo("pl-PL"));
+
+            Operation = null;
+        }
+        catch
+        {
+            numberInput.Text = "Błąd";
+        }
     }
 }

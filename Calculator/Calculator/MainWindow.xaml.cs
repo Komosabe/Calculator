@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AdonisUI;
+using Calculator.Helpers;
 
 namespace Calculator;
 
@@ -18,9 +19,17 @@ namespace Calculator;
 public partial class MainWindow : Window
 {
     private const int MaxDigits = 15;
+    private decimal FirstValue { get; set; }
+
+    IOperation Operation;
+    
     public MainWindow()
     {
         InitializeComponent();
+        buttonSum.Tag = new Sum();
+        buttonSubstract.Tag = new Subtract();
+        buttonMultiply.Tag = new Multiply();
+        buttonDivide.Tag = new Divide();
     }
 
     private void buttonNumber_Click(object sender, RoutedEventArgs e)
@@ -80,5 +89,63 @@ public partial class MainWindow : Window
 
         if (numberInput.Text == "")
             numberInput.Text = "0";
+    }
+
+    public void buttonClearAll_Click(object sender, RoutedEventArgs e)
+    {
+        FirstValue = 0;
+        Operation = null;
+        numberInput.Text = "0";
+    }
+
+    public void Window_PreviewTextNumberInput(object sender, TextCompositionEventArgs e)
+    {
+        switch (e.Text)
+        {
+            case "0":
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+            case "9":
+                SendToInput(e.Text);
+                break;
+
+            case "*":
+                btnMultiplication.PerformClick();
+                break;
+
+            case "-":
+                btnSubtraction.PerformClick();
+                break;
+
+            case "+":
+                btnSum.PerformClick();
+                break;
+
+            case "/":
+                btnDivision.PerformClick();
+                break;
+
+            case "=":
+                btnEquals.PerformClick();
+                break;
+
+            default:
+                if (e.Text == DecimalSeparator)
+                    btnPoint.PerformClick();
+                else if (e.Text[0] == (char)8)
+                    btnBack.PerformClick();
+                else if (e.Text[0] == (char)13)
+                    btnEquals.PerformClick();
+
+                break;
+        }
+
+        btnEquals.Focus();
     }
 }
